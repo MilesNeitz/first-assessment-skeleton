@@ -37,9 +37,12 @@ public class ClientHandler implements Runnable {
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
+						Server.users.put(message.getUsername(),this.socket);
+						log.debug(Server.users.toString());
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
+						Server.users.remove(message.getUsername()); // add a way to see when they close
 						this.socket.close();
 						break;
 					case "echo":
@@ -48,6 +51,12 @@ public class ClientHandler implements Runnable {
 						writer.write(response);
 						writer.flush();
 						break;
+					case "users":
+						log.info("user <{}> requested all users <{}>", message.getUsername(), (Server.users.keySet()).toString());
+						message.setContents((Server.users.keySet()).toString());
+						String users = mapper.writeValueAsString(message);
+						writer.write(users);
+						writer.flush();
 				}
 			}
 

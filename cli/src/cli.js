@@ -7,16 +7,21 @@ export const cli = vorpal()
 
 let username
 let server
+let host
+let port
+let lastCommand = ''
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
 
 cli
-  .mode('connect <username>')
+  .mode('connect <username> <host> <port>')
   .delimiter(cli.chalk['green']('connected>'))
   .init(function (args, callback) {
     username = args.username
-    server = connect({ host: 'localhost', port: 8080 }, () => {
+    host = args.host
+    port = args.port
+    server = connect({ host: host, port: port }, () => {
       server.write(new Message({ username, command: 'connect' }).toJSON() + '\n')
       callback()
     })
@@ -30,16 +35,24 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = words(input)
-    const contents = rest.join(' ')
-
+    let [ command, ...rest ] = words(input)
+    let contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
     } else if (command === 'echo') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      lastCommand = command
+    } else if (command === 'users') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      lastCommand = command
+    } else if (lastCommand === 'echo') {
+      contents === '' ? contents = command : contents = command + ' ' + contents
+      command = lastCommand
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+    } else if (lastCommand === 'users') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)
     }
-
     callback()
   })

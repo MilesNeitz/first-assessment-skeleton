@@ -3,6 +3,8 @@ package com.cooksys.assessment.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
@@ -13,6 +15,8 @@ public class Server implements Runnable {
 	
 	private int port;
 	private ExecutorService executor;
+	
+	static Map<String, Socket> users = new HashMap<String, Socket>();
 	
 	public Server(int port, ExecutorService executor) {
 		super();
