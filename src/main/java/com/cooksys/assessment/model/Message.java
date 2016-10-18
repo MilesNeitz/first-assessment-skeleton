@@ -1,7 +1,8 @@
 package com.cooksys.assessment.model;
 
 public class Message {
-
+	
+	private String timeStamp;
 	private String username;
 	private String command;
 	private String contents;
@@ -12,6 +13,14 @@ public class Message {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+	
+	public String getTimeStamp() {
+		return timeStamp;
+	}
+
+	public void setTimeStamp(String timeStamp) {
+		this.timeStamp = timeStamp;
 	}
 
 	public String getCommand() {

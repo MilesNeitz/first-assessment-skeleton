@@ -33,30 +33,41 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
-
+				java.util.Date date= new java.util.Date();
+				message.setTimeStamp(String.valueOf(date.toString()));
 				switch (message.getCommand()) {
 					case "connect":
-						log.info("user <{}> connected", message.getUsername());
+						log.info(message.getTimeStamp() + " user <{}> connected", message.getUsername());
 						Server.users.put(message.getUsername(),this.socket);
 						log.debug(Server.users.toString());
 						break;
 					case "disconnect":
-						log.info("user <{}> disconnected", message.getUsername());
+						log.info(message.getTimeStamp() + " user <{}> disconnected", message.getUsername());
 						Server.users.remove(message.getUsername()); // add a way to see when they close
 						this.socket.close();
 						break;
 					case "echo":
-						log.info("user <{}> echoed message <{}>", message.getUsername(), message.getContents());
-						String response = mapper.writeValueAsString(message);
-						writer.write(response);
+						log.info(message.getTimeStamp() + " user <{}> echoed message <{}>", message.getUsername(), message.getContents());
+						String echo = mapper.writeValueAsString(message);
+						writer.write(echo);
 						writer.flush();
 						break;
+					case "broadcast":
+						log.info(message.getTimeStamp() + " user <{}> broadcasted to all users <{}>", message.getUsername(), message.getContents());
+						String broadcast = mapper.writeValueAsString(message);
+						for(String currentKey : Server.users.keySet()) {
+							PrintWriter tempWriter = new PrintWriter(new OutputStreamWriter(Server.users.get(currentKey).getOutputStream()));
+							tempWriter.write(broadcast);
+							tempWriter.flush();
+						}
+						break;
 					case "users":
-						log.info("user <{}> requested all users <{}>", message.getUsername(), (Server.users.keySet()).toString());
+						log.info(message.getTimeStamp() + " user <{}> requested all users <{}>", message.getUsername(), (Server.users.keySet()).toString());
 						message.setContents((Server.users.keySet()).toString());
 						String users = mapper.writeValueAsString(message);
 						writer.write(users);
 						writer.flush();
+						break;
 				}
 			}
 

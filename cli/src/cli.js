@@ -42,10 +42,17 @@ cli
     } else if (command === 'echo') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       lastCommand = command
+    } else if (command === 'broadcast') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      lastCommand = command
     } else if (command === 'users') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       lastCommand = command
     } else if (lastCommand === 'echo') {
+      contents === '' ? contents = command : contents = command + ' ' + contents
+      command = lastCommand
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+    } else if (command === 'broadcast') {
       contents === '' ? contents = command : contents = command + ' ' + contents
       command = lastCommand
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
