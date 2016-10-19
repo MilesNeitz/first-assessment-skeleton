@@ -21,44 +21,30 @@ export class Message {
 
   toString () {
     var chalk = require('chalk')
-    if (this.command === 'echo') {
-      return chalk.yellow((this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents))
-    } else if (this.command === 'broadcast') {
-      return chalk.magenta((this.timeStamp + ' <' + this.username + '> (all): ' + this.contents))
-    } else if (this.command.charAt(0) === '@') {
-      return chalk.green((this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents))
-    } else if (this.command === 'failedWhisper') {
-      return chalk.red((this.timeStamp + ': <' + this.contents + '> is not connected'))
-    } else if (this.command === 'connect') {
-      return chalk.grey((this.timeStamp + ': <' + this.username + '> has connected'))
-    } else if (this.command === 'disconnect') {
-      return chalk.grey((this.timeStamp + ': <' + this.username + '> has disconnected'))
-    } else if (this.command === 'users') {
-      let returnString = chalk.blue((this.timeStamp + ': currently connected users:'))
-      let usersArray = ((this.contents).split(','))
-      usersArray.forEach((user) => {
-        returnString = returnString + '\n' + chalk.blue('<' + user + '>')
-      })
-      return returnString
-    } else {
-      return (this.contents)
+    switch (this.command) {
+      case 'echo' :
+        return chalk.yellow((this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents))
+      case 'broadcast' :
+        return chalk.magenta((this.timeStamp + ' <' + this.username + '> (all): ' + this.contents))
+      case 'failedWhisper' :
+        return chalk.red((this.timeStamp + ': <' + this.contents + '> is not connected'))
+      case 'connect' :
+        return chalk.grey((this.timeStamp + ': <' + this.username + '> has connected'))
+      case 'disconnect' :
+        return chalk.grey((this.timeStamp + ': <' + this.username + '> has disconnected'))
+      case 'users' :
+        let returnString = chalk.blue((this.timeStamp + ': currently connected users:'))
+        let usersArray = ((this.contents).split(','))
+        usersArray.forEach((user) => {
+          returnString = returnString + '\n' + chalk.blue('<' + user + '>')
+        })
+        return returnString
+      default :
+        if (this.command.charAt(0) === '@') {
+          return chalk.green((this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents))
+        } else {
+          return (`Command <${this.command}> was not recognized`)
+        }
     }
-//     echo:
-// `${timestamp} <${username}> (echo): ${contents}`
-//
-// broadcast:
-// `${timestamp} <${username}> (all): ${contents}`
-//
-// direct message:
-// `${timestamp} <${username}> (whisper): ${contents}`
-//
-// connection alert:
-// `${timestamp}: <${username}> has connected`
-// `${timestamp}: <${username}> has disconnected`
-//
-// users:
-// `${timestamp}: currently connected users:`
-// (repeated)
-// `<${username}>`
   }
 }
