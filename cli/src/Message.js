@@ -24,7 +24,7 @@ export class Message {
       return (this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents)
     } else if (this.command === 'broadcast') {
       return (this.timeStamp + ' <' + this.username + '> (all): ' + this.contents)
-    } else if (this.command === 'direct message') {
+    } else if (this.command.charAt(0) === '@') {
       return (this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents)
     } else if (this.command === 'connection alert') {
       return (this.timeStamp + ': <' + this.username + '> has ' + this.contents)

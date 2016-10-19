@@ -35,7 +35,7 @@ cli
     })
   })
   .action(function (input, callback) {
-    let [ command, ...rest ] = words(input)
+    let [ command, ...rest ] = words(input, /[^, ]+/g)
     let contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
@@ -45,6 +45,9 @@ cli
     } else if (command === 'broadcast') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       lastCommand = command
+    } else if (command.charAt(0) === '@') {
+      server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      lastCommand = command
     } else if (command === 'users') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       lastCommand = command
@@ -52,7 +55,7 @@ cli
       contents === '' ? contents = command : contents = command + ' ' + contents
       command = lastCommand
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (command === 'broadcast') {
+    } else if (lastCommand === 'broadcast') {
       contents === '' ? contents = command : contents = command + ' ' + contents
       command = lastCommand
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
