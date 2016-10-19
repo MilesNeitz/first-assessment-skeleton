@@ -18,7 +18,7 @@ public class ClientHandler implements Runnable {
 	private Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	private Socket socket;
-	
+
 	private Map<String, Socket> users;
 
 	public ClientHandler(Socket socket, Map<String, Socket> users) {
@@ -87,23 +87,32 @@ public class ClientHandler implements Runnable {
 				case "users":
 					log.info(message.getTimeStamp() + " user <{}> requested all users <{}>", message.getUsername(),
 							(users.keySet()).toString());
-					message.setContents((users.keySet()).toString());
+					message.setContents(((users.keySet()).toString()).replaceAll("\\[|\\]|\\ ", ""));
 					String users = mapper.writeValueAsString(message);
 					writer.write(users);
 					writer.flush();
 					break;
 				}
 				if ((message.getCommand().substring(0, 1)).equals("@")) {
-					log.debug(message.getCommand().substring(1));
-					log.info(message.getTimeStamp() + " user <{}> wispered to <{}>", message.getUsername(),
-							message.getCommand().substring(1));
-					String whisper = mapper.writeValueAsString(message);
-
-					PrintWriter tempWriter = new PrintWriter(
-							new OutputStreamWriter(users.get(message.getCommand().substring(1)).getOutputStream()));
-					tempWriter.write(whisper);
-					tempWriter.flush();
-
+					if (users.containsKey((message.getCommand().substring(1)))) {
+						log.info(message.getTimeStamp() + " user <{}> wispered to <{}>", message.getUsername(),
+								message.getCommand().substring(1));
+						String whisper = mapper.writeValueAsString(message);
+						PrintWriter tempWriter = new PrintWriter(
+								new OutputStreamWriter(users.get(message.getCommand().substring(1)).getOutputStream()));
+						tempWriter.write(whisper);
+						tempWriter.flush();
+					} else {
+						log.debug(message.getCommand().substring(1));
+						log.debug(users.keySet().toString());
+						log.info(message.getTimeStamp() + " user <{}> tried to message <{}>", message.getUsername(),
+								message.getCommand().substring(1));
+						message.setContents(message.getCommand().substring(1));
+						message.setCommand("failedWhisper");
+						String echo = mapper.writeValueAsString(message);
+						writer.write(echo);
+						writer.flush();
+					}	
 				}
 			}
 

@@ -27,12 +27,19 @@ export class Message {
       return chalk.magenta((this.timeStamp + ' <' + this.username + '> (all): ' + this.contents))
     } else if (this.command.charAt(0) === '@') {
       return chalk.green((this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents))
+    } else if (this.command === 'failedWhisper') {
+      return chalk.red((this.timeStamp + ': <' + this.contents + '> is not connected'))
     } else if (this.command === 'connect') {
-      return chalk.red((this.timeStamp + ': <' + this.username + '> has connected'))
+      return chalk.grey((this.timeStamp + ': <' + this.username + '> has connected'))
     } else if (this.command === 'disconnect') {
-      return chalk.red((this.timeStamp + ': <' + this.username + '> has disconnected'))
+      return chalk.grey((this.timeStamp + ': <' + this.username + '> has disconnected'))
     } else if (this.command === 'users') {
-      return chalk.blue((this.timeStamp + ': currently connected users:' + this.contents))
+      let returnString = chalk.blue((this.timeStamp + ': currently connected users:'))
+      let usersArray = ((this.contents).split(','))
+      usersArray.forEach((user) => {
+        returnString = returnString + '\n' + chalk.blue('<' + user + '>')
+      })
+      return returnString
     } else {
       return (this.contents)
     }
