@@ -20,16 +20,19 @@ export class Message {
   }
 
   toString () {
+    var chalk = require('chalk')
     if (this.command === 'echo') {
-      return (this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents)
+      return chalk.yellow((this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents))
     } else if (this.command === 'broadcast') {
-      return (this.timeStamp + ' <' + this.username + '> (all): ' + this.contents)
+      return chalk.magenta((this.timeStamp + ' <' + this.username + '> (all): ' + this.contents))
     } else if (this.command.charAt(0) === '@') {
-      return (this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents)
-    } else if (this.command === 'connection alert') {
-      return (this.timeStamp + ': <' + this.username + '> has ' + this.contents)
+      return chalk.green((this.timeStamp + ' <' + this.username + '> (whisper): ' + this.contents))
+    } else if (this.command === 'connect') {
+      return chalk.red((this.timeStamp + ': <' + this.username + '> has connected'))
+    } else if (this.command === 'disconnect') {
+      return chalk.red((this.timeStamp + ': <' + this.username + '> has disconnected'))
     } else if (this.command === 'users') {
-      return (this.timeStamp + ': currently connected users:' + this.contents)
+      return chalk.blue((this.timeStamp + ': currently connected users:' + this.contents))
     } else {
       return (this.contents)
     }

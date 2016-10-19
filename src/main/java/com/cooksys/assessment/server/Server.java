@@ -16,7 +16,7 @@ public class Server implements Runnable {
 	private int port;
 	private ExecutorService executor;
 	
-	static Map<String, Socket> users = new HashMap<String, Socket>();
+	private Map<String, Socket> users = new HashMap<String, Socket>();
 	
 	public Server(int port, ExecutorService executor) {
 		super();
@@ -31,7 +31,7 @@ public class Server implements Runnable {
 			ss = new ServerSocket(this.port);
 			while (true) {
 				Socket socket = ss.accept();
-				ClientHandler handler = new ClientHandler(socket);
+				ClientHandler handler = new ClientHandler(socket, users);
 				executor.execute(handler);
 			}
 		} catch (IOException e) {

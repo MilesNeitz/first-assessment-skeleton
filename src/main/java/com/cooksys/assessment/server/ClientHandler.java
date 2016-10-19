@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,13 @@ public class ClientHandler implements Runnable {
 	private Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	private Socket socket;
+	
+	private Map<String, Socket> users;
 
-	public ClientHandler(Socket socket) {
+	public ClientHandler(Socket socket, Map<String, Socket> users) {
 		super();
 		this.socket = socket;
+		this.users = users;
 	}
 
 	public void run() {
@@ -38,14 +42,28 @@ public class ClientHandler implements Runnable {
 				switch (message.getCommand()) {
 				case "connect":
 					log.info(message.getTimeStamp() + " user <{}> connected", message.getUsername());
-					Server.users.put(message.getUsername(), this.socket);
-					log.debug(Server.users.toString());
+					users.put(message.getUsername(), this.socket);
+					log.debug(users.toString());
+					message.setCommand("connect");
+					String connect = mapper.writeValueAsString(message);
+					for (String currentKey : users.keySet()) {
+						PrintWriter tempWriter = new PrintWriter(
+								new OutputStreamWriter(users.get(currentKey).getOutputStream()));
+						tempWriter.write(connect);
+						tempWriter.flush();
+					}
 					break;
 				case "disconnect":
 					log.info(message.getTimeStamp() + " user <{}> disconnected", message.getUsername());
-					Server.users.remove(message.getUsername()); // add a way to
-																// see when they
-																// close
+					users.remove(message.getUsername()); // add a way to see when they close
+					message.setCommand("disconnect");
+					String disconnect = mapper.writeValueAsString(message);
+					for (String currentKey : users.keySet()) {
+						PrintWriter tempWriter = new PrintWriter(
+								new OutputStreamWriter(users.get(currentKey).getOutputStream()));
+						tempWriter.write(disconnect);
+						tempWriter.flush();
+					}											
 					this.socket.close();
 					break;
 				case "echo":
@@ -59,23 +77,22 @@ public class ClientHandler implements Runnable {
 					log.info(message.getTimeStamp() + " user <{}> broadcasted to all users <{}>", message.getUsername(),
 							message.getContents());
 					String broadcast = mapper.writeValueAsString(message);
-					for (String currentKey : Server.users.keySet()) {
+					for (String currentKey : users.keySet()) {
 						PrintWriter tempWriter = new PrintWriter(
-								new OutputStreamWriter(Server.users.get(currentKey).getOutputStream()));
+								new OutputStreamWriter(users.get(currentKey).getOutputStream()));
 						tempWriter.write(broadcast);
 						tempWriter.flush();
 					}
 					break;
 				case "users":
 					log.info(message.getTimeStamp() + " user <{}> requested all users <{}>", message.getUsername(),
-							(Server.users.keySet()).toString());
-					message.setContents((Server.users.keySet()).toString());
+							(users.keySet()).toString());
+					message.setContents((users.keySet()).toString());
 					String users = mapper.writeValueAsString(message);
 					writer.write(users);
 					writer.flush();
 					break;
 				}
-				log.debug(message.getCommand().substring(0, 1));
 				if ((message.getCommand().substring(0, 1)).equals("@")) {
 					log.debug(message.getCommand().substring(1));
 					log.info(message.getTimeStamp() + " user <{}> wispered to <{}>", message.getUsername(),
@@ -83,7 +100,7 @@ public class ClientHandler implements Runnable {
 					String whisper = mapper.writeValueAsString(message);
 
 					PrintWriter tempWriter = new PrintWriter(
-							new OutputStreamWriter(Server.users.get(message.getCommand().substring(1)).getOutputStream()));
+							new OutputStreamWriter(users.get(message.getCommand().substring(1)).getOutputStream()));
 					tempWriter.write(whisper);
 					tempWriter.flush();
 
