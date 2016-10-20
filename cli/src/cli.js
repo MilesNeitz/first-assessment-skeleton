@@ -39,27 +39,13 @@ cli
     let contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command }).toJSON() + '\n')
-    } else if (command === 'echo') {
+    } else if (command === 'echo' || command === 'broadcast' || command.charAt(0) === '@' || command === 'users') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
       lastCommand = command
-    } else if (command === 'broadcast') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-      lastCommand = command
-    } else if (command.charAt(0) === '@') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-      lastCommand = command
-    } else if (command === 'users') {
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-      lastCommand = command
-    } else if (lastCommand === 'echo') {
+    } else if (lastCommand === 'echo' || lastCommand === 'broadcast' || lastCommand.charAt(0) === '@' || lastCommand === 'users') {
+      this.log(lastCommand)
       contents === '' ? contents = command : contents = command + ' ' + contents
       command = lastCommand
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (lastCommand === 'broadcast') {
-      contents === '' ? contents = command : contents = command + ' ' + contents
-      command = lastCommand
-      server.write(new Message({ username, command, contents }).toJSON() + '\n')
-    } else if (lastCommand === 'users') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)

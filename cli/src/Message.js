@@ -20,7 +20,7 @@ export class Message {
   }
 
   toString () {
-    var chalk = require('chalk')
+    let chalk = require('chalk')
     switch (this.command) {
       case 'echo' :
         return chalk.yellow((this.timeStamp + ' <' + this.username + '> (echo): ' + this.contents))
@@ -28,6 +28,8 @@ export class Message {
         return chalk.magenta((this.timeStamp + ' <' + this.username + '> (all): ' + this.contents))
       case 'failedWhisper' :
         return chalk.red((this.timeStamp + ': <' + this.contents + '> is not connected'))
+      case 'failedConnect' :
+        return chalk.red((this.timeStamp + ': <' + this.contents + '> is already a user. Please choose a different name'))
       case 'connect' :
         return chalk.grey((this.timeStamp + ': <' + this.username + '> has connected'))
       case 'disconnect' :
